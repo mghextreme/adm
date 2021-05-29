@@ -1,0 +1,1 @@
+<?php if(!isset($_SESSION['usere2'])){echo '<META http-equiv="refresh" content="0;URL=login.php">';die;} ?>
