@@ -223,52 +223,27 @@
 	
 	function GetValuesGroup($db, $orderStart, $many)
 	{
-		$values = NULL;
-		if (($orderStart + $many) > countItems($db))
-			$orderEnd = countItems($db) - 1;
-		else $orderEnd = $orderStart + $many - 1;
+		$sql = "SELECT `id` FROM {$db} WHERE `order`>{$orderStart} ORDER BY `order` ASC LIMIT {$many}";
+		$query = mysql_query($sql)
 		
-		$j = 0;
-		for ($i = $orderStart; $i <= $orderEnd; $i++)
+		while ($rows = mysql_fetch_array($query))
 		{
-			$sql = "SELECT `id` FROM " . $db . " WHERE `order`=" . $i;
-			$rows = mysql_fetch_array(mysql_query($sql));
-			$values[$j] = GetValuesSingle($db, $rows['id']);
-			$j++;
+			$values[] = GetValuesSingle($db, $rows['id']);
 		}
 		return $values;
 	}
 	
 	function GetValuesRandom($db, $many)
 	{
-		$count = countItems($db);
-		$numbs = NULL;
-		$many = $many > $count ? $count : $many;
-		for ($i = 0; $i < $many; $i++)
-		{
-			$ok = false;
-			while(!$ok)
-			{
-				$random = rand(0, $count - 1);
-				$ok = true;
-				if ($i != 0)
-				{
-					foreach($numbs as $n)
-					{
-						$ok = $n == $random ? false : true;
-					}
-				}
-			}
-			
-			$numbs[$i] = $random;
-		}
-		
 		$values = NULL;
 		for ($j = 0; $j < $many; $j++)
 		{
-			$sql = "SELECT `id` FROM " . $db . " WHERE `order`=" . $numbs[$j];
-			$rows = mysql_fetch_array(mysql_query($sql));
-			$values[$j] = GetValuesSingle($db, $rows['id']);
+			$sql = "SELECT `id` FROM " . $db . " ORDER BY RAND()";
+			$rows = mysql_query($sql);
+			while ($rows = mysql_fetch_assoc($query))
+			{
+				$values[] = GetValuesSingle($db, $rows['id']);
+			}
 		}
 		return $values;
 	}
@@ -474,13 +449,9 @@
 	
 	function CountDatabaseItems($db)
 	{
-		$sql = "SELECT `id` FROM `" . $db . "`";
-		$query = mysql_query($sql);
-		
-		$count = 0;
-		while($rows = mysql_fetch_assoc($query))
-		{ $count++; }
-		
+		$sql = "SELECT COUNT(`id`) AS `count` FROM `" . $db . "`";
+		$rows = mysql_fetch_assoc(mysql_query($sql));
+		$count = $rows['count'];
 		return $count;
 	}
 	
